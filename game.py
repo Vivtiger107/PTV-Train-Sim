@@ -121,7 +121,7 @@ def main():
             leave = "Y"
         if leave != "Y":
             leave = input("Would you like to leave at this station? (Y/N): ").upper()
-            if leave == "Y":
+            if leave == "Y" and current_train.replace(" to city", "") in v_line_services:
                 if direction == 0:
                     metro_stations = set()
                     for service in raw_stations_data["M"]:
@@ -150,17 +150,17 @@ def create_timetable(current_location, time):
             if all_services[service][0].index(current_location) == 0:
                 start_allowed.remove(service)
         except ValueError:
-            if all_services[service][1].index(current_location) == 0:
-                start_allowed.remove(service)
+            pass
         try:
             if all_services[service][0].index(current_location) == (len(all_services[service][0]) - 1):
                 end_allowed.remove(service)
         except ValueError:
-            if all_services[service][1].index(current_location) == len(all_services[service][1]) - 1:
-                end_allowed.remove(service)
-        if service == "Bairnsdale" and current_location == "Flinders Street":
-            start_allowed.remove(service)
-        if service in raw_stations_data["V"]:
+            pass
+        metro_stations = set()
+        for service_ in raw_stations_data["M"]:
+            for station_ in raw_stations_data["M"][service_][1]:
+                metro_stations.add(station_)
+        if service in raw_stations_data["V"] and current_location in metro_stations:
             start_allowed.remove(service)
     timetable = []
     timetable_times = []
@@ -203,16 +203,20 @@ def train_line(current_location, direction, service):
         ending_station = "Southern Cross"
     os.system(f"say 'This is a service to {ending_station}, stopping all stations via {via}'")
     if direction == 1:
-        current_location_index = all_services[service][direction].index(current_location)
+        try:
+            current_location_index = all_services[service][direction].index(current_location)
+        except ValueError:
+            direction = 0 if direction == 1 else 1
+            current_location_index = all_services[service][direction].index(current_location)
         if current_location_index != len(all_services[service][direction]) - 1:
             wait(routes_times[service])
             print(f"Points: {points}")
             print(f"Mission: {mission[0]}")
             while True:
                 current_location = all_services[service][direction][current_location_index + 1]
-                if 12 < clock.hour <= 4:
+                if 12 < clock.hour <= 16:
                     if current_location in ("Flagstaff", "Melbourne Central", "Parliament"):
-                        current_location_index = all_services[service][direction][all_services[service].index(current_location) - 1]
+                        current_location_index += 1
                         continue
                     break
                 break
@@ -227,7 +231,11 @@ def train_line(current_location, direction, service):
         else:
             print("You are already in the city: Error 001")
     else:
-        current_location_index = all_services[service][direction].index(current_location)
+        try:
+            current_location_index = all_services[service][direction].index(current_location)
+        except ValueError:
+            direction = 0 if direction == 1 else 1
+            current_location_index = all_services[service][direction].index(current_location)
         if current_location_index != len(all_services[service][direction]) - 1:
             wait(routes_times[service])
             print(f"Points: {points}")
