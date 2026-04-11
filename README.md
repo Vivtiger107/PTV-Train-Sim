@@ -15,3 +15,5 @@ Rules:
     There is a clock in the game which will help you figure out if it is rush hour or not
   . REMEMBER TO TYPE QUIT TO LEAVE THE GAME, DO NOT JUST CLOSE THE WINDOW, THIS IS TO MAKE SURE THE GAME IS ALLOWED TO SAVE
 This game may still have bugs, I have tried to fix most of them but if you do encounter any, don't hesistate to report the bug
+
+WARNING: THIS GAME WILL MOST PROBABLY WORK ONLY ON MAC, BECAUSE OF THE COMMAND I USE TO MAKE THE TRAIN ANNOUNCEMENTS, IF YOU REALLY WANT TO PLAY THIS GAME ON WINDOWS OR ANOTHER PLATFORM, SEARCH UP HOW TO USE THE COMMAND ON YOUR PLATFORM
