@@ -161,7 +161,10 @@ def create_timetable(current_location, time):
             for station_ in raw_stations_data["M"][service_][1]:
                 metro_stations.add(station_)
         if service in raw_stations_data["V"] and current_location in metro_stations:
-            start_allowed.remove(service)
+            try:
+                start_allowed.remove(service)
+            except ValueError:
+                continue
     timetable = []
     timetable_times = []
     time = time
