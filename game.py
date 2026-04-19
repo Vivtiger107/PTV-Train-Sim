@@ -154,7 +154,7 @@ def create_timetable(current_location, time):
         try:
             if all_services[service][0].index(current_location) == (len(all_services[service][0]) - 1):
                 end_allowed.remove(service)
-        except ValueError:
+        except KeyError:
             pass
         metro_stations = set()
         for service_ in raw_stations_data["M"]:
