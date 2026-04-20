@@ -1,10 +1,10 @@
 import json
+import platform
 import random
 import time
 from datetime import datetime, timedelta
-import os
-
-with open("stations_routes.json", "r") as f:
+import subprocess
+with open(r"C:\Users\RAM0044\OneDrive - Melbourne High School\Desktop\PTV-Train-Sim-main\PTV-Train-Sim-main\stations_routes.json", "r") as f:
     raw_stations_data = json.load(f)
     metro_services = raw_stations_data["M"]
     metro_tunnel_services = raw_stations_data["MT"]
@@ -20,15 +20,16 @@ with open("stations_routes.json", "r") as f:
                         stations_services[station] = set()
                     all_stations.add(station)
                     stations_services[station].add(service)
+    print(random.choice(list(all_stations)))
 
-with open("routes_time.json", "r") as f:
+with open(r"C:\Users\RAM0044\OneDrive - Melbourne High School\Desktop\PTV-Train-Sim-main\PTV-Train-Sim-main\routes_time.json", "r") as f:
     routes_times = json.load(f)
     new_routes_times = {}
     for route_time in routes_times.items():
         new_routes_times[route_time[0]] = route_time[1] / len(all_services[route_time[0]][0])
     routes_times = new_routes_times
 
-with open("save.json", "r") as f:
+with open(r"C:\Users\RAM0044\OneDrive - Melbourne High School\Desktop\PTV-Train-Sim-main\PTV-Train-Sim-main\save.json", "r") as f:
     save_data = json.load(f)
     points = save_data["Points"]
     clock = datetime.fromisoformat(save_data["Time"])
@@ -110,7 +111,11 @@ def main():
     wait(time_for_train)
     print(f"Mission: {mission[0]}")
     print("You have boarded the train")
-    os.system("say 'Train is now ready to depart, please stand clear of the platform'")
+    message = "Train is now readt to depart, please stand clear of the platform"
+    if platform.system() == "Darwin":
+        subprocess.run(['say', message])
+    if platform.system() == "Linux":
+        subprocess.run(["espeak", message])
     direction = (1 if "to city" in current_train else 0)
     leave = "N"
     while leave != "Y":
@@ -132,12 +137,21 @@ def main():
                         leave = "N"
         else:
             print("This train terminates here. All change please")
-            os.system("say 'This train terminates here. All change please'")
+            message = 'This train terminates here. All change please'
+            if platform.system() == "Darwin":
+                subprocess.run(["say", message])
+            if platform.systen() == "Linux":
+                subprocess.run(["espeak", message])
         if leave == "Y":
             if check_mission(current_location):
                 print("Mission achieved!")
                 print(f"Points: {points}")
-                os.system("say 'Mission achieved!'")
+                #TODO: Fix these commands to be inter-platform and the rest of the os commands
+                message = "Mission achieved!"
+                if platform.system() == "Darwin":
+                    subprocess.run("say", message)
+                if platform.sytem() == "Linux":
+                    subprocess.run("espeak", message)
                 os.system("afplay 'Level complete.wav'")
     main()
 
@@ -154,7 +168,7 @@ def create_timetable(current_location, time):
         try:
             if all_services[service][0].index(current_location) == (len(all_services[service][0]) - 1):
                 end_allowed.remove(service)
-        except KeyError:
+        except ValueError:
             pass
         metro_stations = set()
         for service_ in raw_stations_data["M"]:
@@ -163,7 +177,7 @@ def create_timetable(current_location, time):
         if service in raw_stations_data["V"] and current_location in metro_stations:
             try:
                 start_allowed.remove(service)
-            except ValueError:
+            except KeyError:
                 continue
     timetable = []
     timetable_times = []
