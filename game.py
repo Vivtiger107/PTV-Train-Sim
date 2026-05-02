@@ -3,6 +3,7 @@ import random
 import time
 from datetime import datetime, timedelta
 import os
+import tracker
 
 with open("stations_routes.json", "r") as f:
     raw_stations_data = json.load(f)
@@ -115,6 +116,7 @@ def main():
     leave = "N"
     while leave != "Y":
         current_location = train_line(current_location, direction, current_train.replace(" to city", ""))
+        print(f"You are {tracker.main(current_location, mission[0])} stops away from your destination")
         if all_services[current_train.replace(" to city", "")][direction].index(current_location) == 0:
             leave = "Y"
         if all_services[current_train.replace(" to city", "")][direction].index(current_location) == len(all_services[current_train.replace(" to city", "")][direction]) - 1:
@@ -154,7 +156,7 @@ def create_timetable(current_location, time):
         try:
             if all_services[service][0].index(current_location) == (len(all_services[service][0]) - 1):
                 end_allowed.remove(service)
-        except KeyError:
+        except ValueError:
             pass
         metro_stations = set()
         for service_ in raw_stations_data["M"]:
@@ -163,8 +165,8 @@ def create_timetable(current_location, time):
         if service in raw_stations_data["V"] and current_location in metro_stations:
             try:
                 start_allowed.remove(service)
-            except ValueError:
-                continue
+            except KeyError:
+                pass
     timetable = []
     timetable_times = []
     time = time
@@ -182,11 +184,11 @@ def create_timetable(current_location, time):
 
 def train_line(current_location, direction, service):
     if direction == 0:
-        if service in ("Bairnsdale", "Pakenham", "Cranbourne", "Frankston", "Sandringham", "Glen Waverley", "Alamein", "Belgrave", "Lilydale"):
+        if service in ("Bairnsdale", "Frankston", "Sandringham", "Glen Waverley", "Alamein", "Belgrave", "Lilydale"):
             via = "Richmond"
         elif service in ("Hurstbridge", "Mernda"):
             via = "Jolimont"
-        elif service in ("Craigeburn", "Upfield", "Werribee", "Williamstown"):
+        elif service in ("Craigieburn", "Upfield", "Werribee", "Williamstown"):
             via = "North Melbourne"
         elif service == "Sunbury":
             via = "State Library"
@@ -263,6 +265,7 @@ def show_time():
 
 def wait(minutes):
     global clock
+    auto_save()
     time.sleep(minutes)
     clock += timedelta(minutes=minutes)
     show_time()
@@ -290,6 +293,11 @@ def save():
         save_data = {"Points": points, "Time": clock.isoformat(), "Current location": current_location, "Mission": list(mission)}
         json.dump(save_data, f)
     exit()
+
+def auto_save():
+    with open("save.json", "w") as f:
+        save_data = {"Points": points, "Time": clock.isoformat(), "Current location": current_location, "Mission": list(mission)}
+        json.dump(save_data, f)
 
 def rush_hour_check():
     global clock
